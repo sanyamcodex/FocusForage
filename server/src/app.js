@@ -14,31 +14,28 @@ import { userRoutes } from "./routes/user.routes.js";
 
 export const app = express();
 
-// Normalize origins — strip trailing slashes so CLIENT_URL with/without slash both work
-const allowedOrigins = env.clientUrl.split(",").map((o) => o.trim().replace(/\/$/, ""));
+// Normalize origins — strip trailing slashes so CLIENT_URL works with or without /
+const allowedOrigins = env.clientUrl.split(",").map((o) => o.trim().replace(/\/+$/, ""));
 
 const corsOptions = {
-  origin(origin, callback) {
-    // Allow server-to-server / curl / Render health checks (no Origin header)
-    if (!origin) return callback(null, true);
-    const normalized = origin.replace(/\/$/, "");
-    if (allowedOrigins.includes(normalized)) return callback(null, true);
-    return callback(null, false);
-  },
+  origin: allowedOrigins,
   credentials: true,
+  methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
   optionsSuccessStatus: 200
 };
 
 app.set("trust proxy", 1);
+
+// ═══════════════════════════════════════════════════════
+// CORS MUST be FIRST — before helmet, before everything
+// ═══════════════════════════════════════════════════════
+app.options("*", cors(corsOptions));   // preflight
+app.use(cors(corsOptions));            // all requests
+
 app.use(helmet());
 app.use(compression());
 app.use(express.json({ limit: "1mb" }));
-
-// Handle ALL preflight OPTIONS requests BEFORE routes (fixes CORS 404 on preflight)
-app.options("*", cors(corsOptions));
-// Apply CORS to all subsequent requests
-app.use(cors(corsOptions));
-
 app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 300, standardHeaders: true, legacyHeaders: false }));
 app.use(morgan(isProduction ? "combined" : "dev"));
 

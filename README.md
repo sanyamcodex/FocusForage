@@ -203,12 +203,14 @@ VITE_API_URL=https://your-render-api.onrender.com/api
 
 1. Create a new Web Service from this repository.
 2. Set root directory to `server`.
-3. Build command: `npm install`.
+3. Build command: `npm ci`.
 4. Start command: `npm start`.
 5. Add environment variables from `server/.env.example`.
 6. Health check path: `/health`.
 
 The included `render.yaml` can also be used as a blueprint.
+
+If Render exits right after `npm start`, check the service environment variables first. In production the backend requires `MONGO_URI` and `JWT_SECRET`, and `CLIENT_URL` should point to your deployed frontend URL. The backend is pinned to Node `20.x` so Render uses the stable LTS runtime instead of a newer experimental major version.
 
 ### Vercel Frontend
 

@@ -6,7 +6,7 @@ import { env } from "./config/env.js";
 import { registerSocketHandlers } from "./sockets/index.js";
 
 const server = http.createServer(app);
-const allowedOrigins = env.clientUrl.split(",").map((origin) => origin.trim());
+const allowedOrigins = env.clientUrl.split(",").map((o) => o.trim().replace(/\/+$/, ""));
 
 const io = new Server(server, {
   cors: {

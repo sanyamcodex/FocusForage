@@ -16,6 +16,14 @@ api.interceptors.request.use((config) => {
 
 api.interceptors.response.use(
   (response) => response.data,
-  (error) => Promise.reject(error.response?.data || { message: "Network error" })
+  (error) => {
+    // Extract the most useful error message available
+    const serverData = error.response?.data;
+    const message =
+      serverData?.message ||
+      error.message ||
+      "Network error";
+    return Promise.reject({ message, ...serverData });
+  }
 );
 

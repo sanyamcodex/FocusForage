@@ -15,21 +15,24 @@ export function AuthProvider({ children }) {
     }
     api
       .get("/auth/me")
-      .then((response) => setUser(response.data.user))
+      .then((response) => setUser(response.data?.user ?? response.user))
       .catch(() => localStorage.removeItem("focusforge_token"))
       .finally(() => setLoading(false));
   }, []);
 
   const login = async (payload) => {
     const response = await api.post("/auth/login", payload);
-    localStorage.setItem("focusforge_token", response.data.token);
-    setUser(response.data.user);
+    // Interceptor returns response.data (axios layer), so backend's { success, data:{user,token} }
+    const { user, token } = response.data;
+    localStorage.setItem("focusforge_token", token);
+    setUser(user);
   };
 
   const register = async (payload) => {
     const response = await api.post("/auth/register", payload);
-    localStorage.setItem("focusforge_token", response.data.token);
-    setUser(response.data.user);
+    const { user, token } = response.data;
+    localStorage.setItem("focusforge_token", token);
+    setUser(user);
   };
 
   const logout = () => {
