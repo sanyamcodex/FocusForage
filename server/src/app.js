@@ -14,7 +14,8 @@ import { userRoutes } from "./routes/user.routes.js";
 
 export const app = express();
 
-const allowedOrigins = env.clientUrl.split(",").map((origin) => origin.trim());
+// Normalize origins — strip trailing slashes so both variants match
+const allowedOrigins = env.clientUrl.split(",").map((o) => o.trim().replace(/\/$/, ""));
 
 app.set("trust proxy", 1);
 app.use(helmet());
@@ -23,10 +24,15 @@ app.use(express.json({ limit: "1mb" }));
 app.use(
   cors({
     origin(origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
-      return callback(new Error("Not allowed by CORS"));
+      // Allow server-to-server / curl / Render health checks (no origin header)
+      if (!origin) return callback(null, true);
+      const normalized = origin.replace(/\/$/, "");
+      if (allowedOrigins.includes(normalized)) return callback(null, true);
+      // Return null (not an Error) so Express doesn't 500 — browser gets a CORS 403 naturally
+      return callback(null, false);
     },
-    credentials: true
+    credentials: true,
+    optionsSuccessStatus: 200 // Some browsers (IE11) choke on 204
   })
 );
 app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 300, standardHeaders: true, legacyHeaders: false }));
