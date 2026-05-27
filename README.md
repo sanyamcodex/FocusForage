@@ -2,7 +2,7 @@
 
 FocusForge is a production-ready MERN SaaS platform for realtime collaborative study rooms. It is designed for students preparing for exams, interviews, and medical studies who need a serious shared workspace: live presence, room chat, synced Pomodoro sessions, activity history, streaks, and a polished analytics dashboard.
 
-![Dashboard screenshot](./assets/Dashboard(2).png)
+![Dashboard screenshot](./assets/Dashboard.png)
 ![Room screenshot](./assets/Room.png)
 
 ## Why This Project Stands Out
