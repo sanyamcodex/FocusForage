@@ -2,8 +2,8 @@
 
 FocusForge is a production-ready MERN SaaS platform for realtime collaborative study rooms. It is designed for students preparing for exams, interviews, and medical studies who need a serious shared workspace: live presence, room chat, synced Pomodoro sessions, activity history, streaks, and a polished analytics dashboard.
 
-![Dashboard screenshot placeholder](./docs/screenshots/dashboard.png)
-![Room screenshot placeholder](./docs/screenshots/room.png)
+![Dashboard screenshot](./assets/Dashboard(2).png)
+![Room screenshot](./assets/Room.png)
 
 ## Why This Project Stands Out
 
@@ -245,4 +245,3 @@ The included `vercel.json` ensures SPA routing works on refresh.
 3. `feat(client): build SaaS dashboard and realtime room UI`
 4. `chore(deploy): add Vercel Render env examples and README`
 5. `test: verify build and production configuration`
-
