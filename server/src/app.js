@@ -14,27 +14,31 @@ import { userRoutes } from "./routes/user.routes.js";
 
 export const app = express();
 
-// Normalize origins — strip trailing slashes so both variants match
+// Normalize origins — strip trailing slashes so CLIENT_URL with/without slash both work
 const allowedOrigins = env.clientUrl.split(",").map((o) => o.trim().replace(/\/$/, ""));
+
+const corsOptions = {
+  origin(origin, callback) {
+    // Allow server-to-server / curl / Render health checks (no Origin header)
+    if (!origin) return callback(null, true);
+    const normalized = origin.replace(/\/$/, "");
+    if (allowedOrigins.includes(normalized)) return callback(null, true);
+    return callback(null, false);
+  },
+  credentials: true,
+  optionsSuccessStatus: 200
+};
 
 app.set("trust proxy", 1);
 app.use(helmet());
 app.use(compression());
 app.use(express.json({ limit: "1mb" }));
-app.use(
-  cors({
-    origin(origin, callback) {
-      // Allow server-to-server / curl / Render health checks (no origin header)
-      if (!origin) return callback(null, true);
-      const normalized = origin.replace(/\/$/, "");
-      if (allowedOrigins.includes(normalized)) return callback(null, true);
-      // Return null (not an Error) so Express doesn't 500 — browser gets a CORS 403 naturally
-      return callback(null, false);
-    },
-    credentials: true,
-    optionsSuccessStatus: 200 // Some browsers (IE11) choke on 204
-  })
-);
+
+// Handle ALL preflight OPTIONS requests BEFORE routes (fixes CORS 404 on preflight)
+app.options("*", cors(corsOptions));
+// Apply CORS to all subsequent requests
+app.use(cors(corsOptions));
+
 app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 300, standardHeaders: true, legacyHeaders: false }));
 app.use(morgan(isProduction ? "combined" : "dev"));
 
@@ -50,4 +54,3 @@ app.use("/api/dashboard", dashboardRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
-
