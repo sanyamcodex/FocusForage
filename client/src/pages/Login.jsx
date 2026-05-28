@@ -5,6 +5,8 @@ import { Input } from "../components/ui/Input";
 import { useToast } from "../components/ui/Toast";
 import { useAuth } from "../context/AuthContext";
 
+const isValidEmail = (email) => /\S+@\S+\.\S+/.test(email);
+
 export function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
@@ -14,6 +16,17 @@ export function Login() {
 
   const submit = async (event) => {
     event.preventDefault();
+
+    if (!form.email.trim() || !form.password) {
+      toast("Email and password are required.");
+      return;
+    }
+
+    if (!isValidEmail(form.email)) {
+      toast("Please enter a valid email address.");
+      return;
+    }
+
     setLoading(true);
     try {
       await login(form);
@@ -27,9 +40,9 @@ export function Login() {
 
   return (
     <AuthFrame title="Welcome back" copy="Join your rooms, resume your timer, and keep the streak alive.">
-      <form onSubmit={submit} className="grid gap-4">
-        <Input type="email" placeholder="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
-        <Input type="password" placeholder="Password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
+      <form noValidate onSubmit={submit} className="grid gap-4">
+        <Input required type="email" placeholder="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+        <Input required type="password" placeholder="Password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
         <Button disabled={loading}>{loading ? "Signing in..." : "Login"}</Button>
       </form>
       <p className="mt-5 text-sm text-muted-foreground">No account? <Link className="text-primary" to="/register">Create one</Link></p>
@@ -46,6 +59,22 @@ export function Register() {
 
   const submit = async (event) => {
     event.preventDefault();
+
+    if (!form.name.trim() || !form.email.trim() || !form.password) {
+      toast("Name, email, and password are required.");
+      return;
+    }
+
+    if (!isValidEmail(form.email)) {
+      toast("Please enter a valid email address.");
+      return;
+    }
+
+    if (form.password.length < 8) {
+      toast("Password must be at least 8 characters long.");
+      return;
+    }
+
     setLoading(true);
     try {
       await register(form);
@@ -59,10 +88,10 @@ export function Register() {
 
   return (
     <AuthFrame title="Create your study command center" copy="Launch a private room, invite peers, and build a visible preparation rhythm.">
-      <form onSubmit={submit} className="grid gap-4">
-        <Input placeholder="Full name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-        <Input type="email" placeholder="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
-        <Input type="password" placeholder="Password, minimum 8 characters" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
+      <form noValidate onSubmit={submit} className="grid gap-4">
+        <Input required placeholder="Full name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+        <Input required type="email" placeholder="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+        <Input required minLength={8} type="password" placeholder="Password, minimum 8 characters" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
         <Button disabled={loading}>{loading ? "Creating..." : "Create account"}</Button>
       </form>
       <p className="mt-5 text-sm text-muted-foreground">Already registered? <Link className="text-primary" to="/login">Login</Link></p>
@@ -82,4 +111,3 @@ function AuthFrame({ title, copy, children }) {
     </div>
   );
 }
-
